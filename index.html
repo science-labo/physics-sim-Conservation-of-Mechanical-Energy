@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>力学的エネルギー保存シミュレーター</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>⚡ 力学的エネルギー保存シミュレーター</h1>
+            <p class="subtitle">エネルギー保存の法則を視覚的に学ぼう</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- タブナビゲーション -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="pendulum">振り子</button>
+            <button class="tab-btn" data-tab="slope">斜面転がり</button>
+            <button class="tab-btn" data-tab="freefall">自由落下</button>
+        </div>
+
+        <!-- 振り子シミュレーション -->
+        <div class="simulation-container active" id="pendulum">
+            <div class="sim-layout">
+                <div class="canvas-section">
+                    <h2>🎯 振り子シミュレーション</h2>
+                    <canvas id="pendulumCanvas"></canvas>
+                    
+                    <!-- コントロールパネル -->
+                    <div class="controls">
+                        <button class="btn btn-primary" id="pendulumPlay">▶ 再生</button>
+                        <button class="btn btn-secondary" id="pendulumPause">⏸ 一時停止</button>
+                        <button class="btn btn-accent" id="pendulumReset">🔄 リセット</button>
+                    </div>
+
+                    <!-- パラメータ設定 -->
+                    <div class="parameters">
+                        <div class="param-group">
+                            <label>質量 (kg): <span id="pendulumMassValue">1.0</span></label>
+                            <input type="range" id="pendulumMass" min="0.5" max="5" step="0.1" value="1.0">
+                        </div>
+                        <div class="param-group">
+                            <label>振り子の長さ (m): <span id="pendulumLengthValue">2.0</span></label>
+                            <input type="range" id="pendulumLength" min="1" max="4" step="0.1" value="2.0">
+                        </div>
+                        <div class="param-group">
+                            <label>初期角度 (度): <span id="pendulumAngleValue">60</span></label>
+                            <input type="range" id="pendulumAngle" min="10" max="80" step="5" value="60">
+                        </div>
+                    </div>
+
+                    <!-- 数値表示 -->
+                    <div class="data-display">
+                        <div class="data-item">
+                            <span class="label">高さ:</span>
+                            <span class="value" id="pendulumHeight">0.00 m</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">速度:</span>
+                            <span class="value" id="pendulumVelocity">0.00 m/s</span>
+                        </div>
+                        <div class="data-item energy-pe">
+                            <span class="label">位置エネルギー:</span>
+                            <span class="value" id="pendulumPE">0.00 J</span>
+                        </div>
+                        <div class="data-item energy-ke">
+                            <span class="label">運動エネルギー:</span>
+                            <span class="value" id="pendulumKE">0.00 J</span>
+                        </div>
+                        <div class="data-item energy-total">
+                            <span class="label">全エネルギー:</span>
+                            <span class="value" id="pendulumTotal">0.00 J</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- グラフセクション -->
+                <div class="chart-section">
+                    <h3>📊 エネルギー推移グラフ</h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="pendulumChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 斜面転がりシミュレーション -->
+        <div class="simulation-container" id="slope">
+            <div class="sim-layout">
+                <div class="canvas-section">
+                    <h2>⛰️ 斜面を転がる球</h2>
+                    <canvas id="slopeCanvas"></canvas>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" id="slopePlay">▶ 再生</button>
+                        <button class="btn btn-secondary" id="slopePause">⏸ 一時停止</button>
+                        <button class="btn btn-accent" id="slopeReset">🔄 リセット</button>
+                    </div>
+
+                    <div class="parameters">
+                        <div class="param-group">
+                            <label>質量 (kg): <span id="slopeMassValue">1.0</span></label>
+                            <input type="range" id="slopeMass" min="0.5" max="5" step="0.1" value="1.0">
+                        </div>
+                        <div class="param-group">
+                            <label>初期高さ (m): <span id="slopeHeightValue">5.0</span></label>
+                            <input type="range" id="slopeHeight" min="2" max="10" step="0.5" value="5.0">
+                        </div>
+                        <div class="param-group">
+                            <label>斜面角度 (度): <span id="slopeAngleValue">30</span></label>
+                            <input type="range" id="slopeAngle" min="15" max="60" step="5" value="30">
+                        </div>
+                    </div>
+
+                    <div class="data-display">
+                        <div class="data-item">
+                            <span class="label">高さ:</span>
+                            <span class="value" id="slopeHeightCurrent">0.00 m</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">速度:</span>
+                            <span class="value" id="slopeVelocity">0.00 m/s</span>
+                        </div>
+                        <div class="data-item energy-pe">
+                            <span class="label">位置エネルギー:</span>
+                            <span class="value" id="slopePE">0.00 J</span>
+                        </div>
+                        <div class="data-item energy-ke">
+                            <span class="label">運動エネルギー:</span>
+                            <span class="value" id="slopeKE">0.00 J</span>
+                        </div>
+                        <div class="data-item energy-total">
+                            <span class="label">全エネルギー:</span>
+                            <span class="value" id="slopeTotal">0.00 J</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h3>📊 エネルギー推移グラフ</h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="slopeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 自由落下シミュレーション -->
+        <div class="simulation-container" id="freefall">
+            <div class="sim-layout">
+                <div class="canvas-section">
+                    <h2>🪂 自由落下と跳ね返り</h2>
+                    <canvas id="freefallCanvas"></canvas>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" id="freefallPlay">▶ 再生</button>
+                        <button class="btn btn-secondary" id="freefallPause">⏸ 一時停止</button>
+                        <button class="btn btn-accent" id="freefallReset">🔄 リセット</button>
+                    </div>
+
+                    <div class="parameters">
+                        <div class="param-group">
+                            <label>質量 (kg): <span id="freefallMassValue">1.0</span></label>
+                            <input type="range" id="freefallMass" min="0.5" max="5" step="0.1" value="1.0">
+                        </div>
+                        <div class="param-group">
+                            <label>初期高さ (m): <span id="freefallHeightValue">10.0</span></label>
+                            <input type="range" id="freefallHeight" min="5" max="15" step="0.5" value="10.0">
+                        </div>
+                        <div class="param-group">
+                            <label>反発係数: <span id="freefallBounceValue">0.80</span></label>
+                            <input type="range" id="freefallBounce" min="0.3" max="0.95" step="0.05" value="0.80">
+                        </div>
+                    </div>
+
+                    <div class="data-display">
+                        <div class="data-item">
+                            <span class="label">高さ:</span>
+                            <span class="value" id="freefallHeightCurrent">0.00 m</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">速度:</span>
+                            <span class="value" id="freefallVelocity">0.00 m/s</span>
+                        </div>
+                        <div class="data-item energy-pe">
+                            <span class="label">位置エネルギー:</span>
+                            <span class="value" id="freefallPE">0.00 J</span>
+                        </div>
+                        <div class="data-item energy-ke">
+                            <span class="label">運動エネルギー:</span>
+                            <span class="value" id="freefallKE">0.00 J</span>
+                        </div>
+                        <div class="data-item energy-total">
+                            <span class="label">全エネルギー:</span>
+                            <span class="value" id="freefallTotal">0.00 J</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h3>📊 エネルギー推移グラフ</h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="freefallChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 説明セクション -->
+        <div class="info-section">
+            <h2>📚 力学的エネルギー保存の法則</h2>
+            <div class="info-content">
+                <div class="info-card">
+                    <h3>位置エネルギー (PE)</h3>
+                    <p>PE = mgh</p>
+                    <p class="description">物体の高さによるエネルギー。高いほど大きい。</p>
+                </div>
+                <div class="info-card">
+                    <h3>運動エネルギー (KE)</h3>
+                    <p>KE = ½mv²</p>
+                    <p class="description">物体の速度によるエネルギー。速いほど大きい。</p>
+                </div>
+                <div class="info-card">
+                    <h3>力学的エネルギー保存</h3>
+                    <p>PE + KE = 一定</p>
+                    <p class="description">摩擦や空気抵抗がない場合、全エネルギーは保存される。</p>
+                </div>
+            </div>
+            <div class="legend-section">
+                <h3>📍 シミュレーション表示の見方</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="legend-icon" style="background: linear-gradient(90deg, #ef4444, #dc2626);"></span>
+                        <span class="legend-text"><strong>赤い矢印</strong>：物体の速度（速さと方向）を表します。矢印が長いほど速度が大きいことを示します。</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"></span>
+                        <span class="legend-text"><strong>青い線</strong>：物体の高さ（位置エネルギーの基準）を表します。</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon" style="background: linear-gradient(90deg, #10b981, #059669);"></span>
+                        <span class="legend-text"><strong>緑のグラフ</strong>：全エネルギー（PE + KE）が一定であることを示します。</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 力学的エネルギー保存シミュレーター - 物理教育ツール</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
